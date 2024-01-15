@@ -2,14 +2,14 @@
 
 Install the package using
 ```bash
-npm install --save simpleworkjs-conf
+npm install --save npm i @simpleworkjs/conf
 ```
 
 In your project, make a `conf` or `settings`  directory or where ever you would
 like to save configuration files. Make a `index.js` with:
 
 ```js
-module.export = require('simpleworkjs-conf')
+module.export = require('npm i @simpleworkjs/conf')
 ```
 
 and require the `conf` directory where ever in your project you want to the

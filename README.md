@@ -1,8 +1,12 @@
-## Useage
+## ALERT!
+
+**This is part of a larger project i am working on and is in ALPHA state!**
+
+## Usage
 
 Install the package using
 ```bash
-npm install --save npm i @simpleworkjs/conf
+npm install --save @simpleworkjs/conf
 ```
 
 In your project, make a `conf` or `settings`  directory or where ever you would

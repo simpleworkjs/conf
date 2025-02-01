@@ -25,8 +25,8 @@ function load(filePath, required){
 
 module.exports = extend(
 	true, // enable deep copy
-	load('./base', true),
-	load(`./${environment}`),
-	load('./secrets'),
+	load(`${__dirname.split('node_modules')[0]}conf/base`, true),
+	load(`${__dirname.split('node_modules')[0]}conf/${environment}`),
+	load(`${__dirname.split('node_modules')[0]}conf/secrets`),
 	{environment}
 );

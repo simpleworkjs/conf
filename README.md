@@ -6,6 +6,8 @@ Configuration management for the SimpleWorkJS framework
 [![Tests](https://github.com/simpleworkjs/conf/workflows/Tests/badge.svg)](https://github.com/simpleworkjs/conf/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
+📚 **[View Full Documentation](https://simpleworkjs.github.io/conf/)**
+
 ## Table of Contents
 
 - [Installation](#installation)

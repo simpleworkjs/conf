@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Configuration management for Node.js applications with multi-environment support">
+    <title>@simpleworkjs/conf - Configuration Management for Node.js</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1>@simpleworkjs/conf</h1>
+                <p class="tagline">Lightweight, flexible configuration management for Node.js</p>
+                <div class="badges">
+                    <a href="https://www.npmjs.com/package/@simpleworkjs/conf"><img src="https://img.shields.io/npm/v/@simpleworkjs/conf.svg" alt="npm version"></a>
+                    <a href="https://github.com/simpleworkjs/conf/actions"><img src="https://github.com/simpleworkjs/conf/workflows/Tests/badge.svg" alt="Tests"></a>
+                    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+                </div>
+                <div class="cta-buttons">
+                    <a href="#installation" class="btn btn-primary">Get Started</a>
+                    <a href="https://github.com/simpleworkjs/conf" class="btn btn-secondary">View on GitHub</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="nav">
+        <div class="container">
+            <ul>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#quick-start">Quick Start</a></li>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#api">API Reference</a></li>
+                <li><a href="#examples">Examples</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="container">
+            <section id="features" class="section">
+                <h2>Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>🌍 Multi-Environment</h3>
+                        <p>Seamlessly switch between development, production, and custom environments using NODE_ENV</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔒 Secrets Management</h3>
+                        <p>Keep sensitive data separate from your codebase with dedicated secrets files</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔄 Deep Merge</h3>
+                        <p>Configurations are deeply merged, allowing granular overrides while preserving base settings</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📘 TypeScript Support</h3>
+                        <p>Full TypeScript definitions included for excellent IDE autocomplete and type safety</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>✅ Well Tested</h3>
+                        <p>96%+ code coverage with comprehensive test suite across multiple Node versions</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🪶 Lightweight</h3>
+                        <p>Minimal dependencies, simple API, zero configuration to get started</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="installation" class="section">
+                <h2>Installation</h2>
+                <pre><code>npm install --save @simpleworkjs/conf</code></pre>
+            </section>
+
+            <section id="quick-start" class="section">
+                <h2>Quick Start</h2>
+                <p>Create a <code>conf</code> directory in your project root:</p>
+                <pre><code>your-project/
+├── node_modules/
+├── conf/
+│   ├── base.js           # Required - base configuration
+│   ├── development.js    # Optional - development environment config
+│   ├── production.js     # Optional - production environment config
+│   └── secrets.js        # Optional - sensitive data (add to .gitignore!)
+└── package.json</code></pre>
+
+                <h3>Example: conf/base.js</h3>
+                <pre><code>module.exports = {
+  app: {
+    name: 'My Application',
+    port: 3000
+  },
+  database: {
+    host: 'localhost',
+    name: 'myapp'
+  }
+};</code></pre>
+
+                <h3>Example: conf/production.js</h3>
+                <pre><code>module.exports = {
+  app: {
+    port: 8080
+  },
+  database: {
+    host: 'prod-db.example.com'
+  }
+};</code></pre>
+
+                <h3>Example: conf/secrets.js</h3>
+                <pre><code>module.exports = {
+  database: {
+    password: 'super-secret-password',
+    username: 'dbuser'
+  },
+  apiKeys: {
+    stripe: 'sk_live_...'
+  }
+};</code></pre>
+
+                <h3>Usage in your application:</h3>
+                <pre><code>const conf = require('@simpleworkjs/conf');
+
+console.log(conf.app.name);        // 'My Application'
+console.log(conf.database.host);   // 'localhost' in dev, 'prod-db.example.com' in prod
+console.log(conf.database.password); // 'super-secret-password' (from secrets.js)
+console.log(conf.environment);     // 'development' or 'production'</code></pre>
+            </section>
+
+            <section id="configuration" class="section">
+                <h2>Configuration Structure</h2>
+
+                <h3>Load Order</h3>
+                <p>Configuration files are loaded and merged in the following order:</p>
+                <ol>
+                    <li><strong>base.js</strong> - Loaded first (required)</li>
+                    <li><strong>&lt;environment&gt;.js</strong> - Loaded second, overrides base settings</li>
+                    <li><strong>secrets.js</strong> - Loaded last, overrides all previous settings</li>
+                </ol>
+                <p>Each subsequent file deeply merges with the previous configuration.</p>
+
+                <h3>Environment Variables</h3>
+                <table class="api-table">
+                    <thead>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Description</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>NODE_ENV</code></td>
+                            <td>Sets the environment (determines which config file to load)</td>
+                            <td><code>development</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CONF_DIR</code></td>
+                            <td>Override the configuration directory path</td>
+                            <td><code>./conf</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="api" class="section">
+                <h2>API Reference</h2>
+                <p>The package exports a single configuration object that includes all merged settings plus:</p>
+                <ul>
+                    <li><code>environment</code> - The current environment name (from <code>NODE_ENV</code>)</li>
+                </ul>
+
+                <h3>TypeScript</h3>
+                <p>Extend the Config interface for type safety:</p>
+                <pre><code>declare module '@simpleworkjs/conf' {
+  interface Config {
+    app: {
+      name: string;
+      port: number;
+    };
+    database: {
+      host: string;
+      name: string;
+      password?: string;
+    };
+  }
+}
+
+import conf = require('@simpleworkjs/conf');
+const port: number = conf.app.port; // Fully typed!</code></pre>
+            </section>
+
+            <section id="examples" class="section">
+                <h2>Examples</h2>
+
+                <h3>Using with Express</h3>
+                <pre><code>const conf = require('@simpleworkjs/conf');
+const express = require('express');
+
+const app = express();
+
+app.listen(conf.app.port, () => {
+  console.log(`Server running on port ${conf.app.port}`);
+});</code></pre>
+
+                <h3>Different Environments</h3>
+                <pre><code># Development (default)
+npm start
+
+# Production
+NODE_ENV=production npm start
+
+# Custom environment
+NODE_ENV=staging npm start  # Loads conf/staging.js</code></pre>
+
+                <h3>Custom Config Directory</h3>
+                <pre><code>CONF_DIR=/path/to/config node app.js</code></pre>
+            </section>
+
+            <section id="best-practices" class="section">
+                <h2>Best Practices</h2>
+                <ul class="best-practices-list">
+                    <li><strong>Always commit</strong> <code>base.js</code> and environment-specific files to version control</li>
+                    <li><strong>Never commit</strong> <code>secrets.js</code> - add it to <code>.gitignore</code></li>
+                    <li><strong>Use environment files</strong> for environment-specific URLs, ports, and settings</li>
+                    <li><strong>Use secrets.js</strong> for API keys, passwords, tokens, and other sensitive data</li>
+                    <li><strong>Keep base.js minimal</strong> - only include truly shared configuration</li>
+                    <li><strong>Document your config</strong> - add comments explaining what each setting does</li>
+                </ul>
+            </section>
+
+            <section id="contributing" class="section">
+                <h2>Contributing</h2>
+                <p>Contributions are welcome! Please see our <a href="https://github.com/simpleworkjs/conf">GitHub repository</a> for guidelines.</p>
+                <ol>
+                    <li>Fork the repository</li>
+                    <li>Create a feature branch: <code>git checkout -b feature/my-feature</code></li>
+                    <li>Make your changes and add tests</li>
+                    <li>Run tests: <code>npm test</code></li>
+                    <li>Commit your changes</li>
+                    <li>Push to the branch</li>
+                    <li>Submit a pull request</li>
+                </ol>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>MIT © simpleworkjs | <a href="https://github.com/simpleworkjs/conf">GitHub</a> | <a href="https://www.npmjs.com/package/@simpleworkjs/conf">npm</a></p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

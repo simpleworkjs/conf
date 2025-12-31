@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Interactive code examples with copy buttons
 - Automatic deployment workflow for documentation
 
+### Changed
+- Updated Node.js engine requirement from >=12.0.0 to >=16.0.0
+- Updated CI test matrix to Node 16, 18, 20, 22 (removed EOL versions 12 and 14)
+
+### Fixed
+- Fixed missing test fixture directories in git repository
+- Fixed CI failures on macOS with older Node versions
+
 ## [1.0.0] - 2025-12-30
 
 ### Added

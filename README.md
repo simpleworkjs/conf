@@ -258,7 +258,7 @@ The test suite uses Mocha and Chai and includes:
 - Error handling
 - Environment variable support
 
-Tests run on multiple Node.js versions (12, 14, 16, 18, 20) and operating systems (Ubuntu, Windows, macOS) via GitHub Actions.
+Tests run on multiple Node.js versions (16, 18, 20, 22) and operating systems (Ubuntu, Windows, macOS) via GitHub Actions.
 
 ## License
 

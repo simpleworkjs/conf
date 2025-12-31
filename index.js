@@ -1,9 +1,32 @@
 'use strict';
 
 const extend = require('extend');
+const path = require('path');
 
 const environment = process.env.NODE_ENV || 'development';
 
+/**
+ * Get the configuration directory root path
+ * @returns {string} The absolute path to the conf directory
+ */
+function getConfigRoot() {
+	// Allow override via environment variable
+	if (process.env.CONF_DIR) {
+		return process.env.CONF_DIR;
+	}
+
+	// When installed as a package, look for conf dir in the project root
+	// Start from current working directory
+	const projectRoot = process.cwd();
+	return path.join(projectRoot, 'conf');
+}
+
+/**
+ * Load a configuration file
+ * @param {string} filePath - Path to the configuration file
+ * @param {boolean} required - Whether the file is required
+ * @returns {Object} The loaded configuration object or empty object if not found
+ */
 function load(filePath, required){
 	try {
 		return require(filePath);
@@ -18,15 +41,17 @@ function load(filePath, required){
 			}
 			return {};
 		}else{
-			console.dir(`Unknown error in loading ${filePath} config file.\n`, error);
+			console.error(`Unknown error in loading ${filePath} config file.\n`, error);
 		}
 	}
 };
 
+const configRoot = getConfigRoot();
+
 module.exports = extend(
 	true, // enable deep copy
-	load(`${__dirname.split('node_modules')[0]}conf/base`, true),
-	load(`${__dirname.split('node_modules')[0]}conf/${environment}`),
-	load(`${__dirname.split('node_modules')[0]}conf/secrets`),
+	load(path.join(configRoot, 'base'), true),
+	load(path.join(configRoot, environment)),
+	load(path.join(configRoot, 'secrets')),
 	{environment}
 );

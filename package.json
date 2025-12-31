@@ -1,11 +1,34 @@
 {
   "name": "@simpleworkjs/conf",
-  "version": "0.1.0",
-  "description": "Configuration management for the SimpleWorkJS framework",
+  "version": "1.0.0",
+  "description": "Lightweight, flexible configuration management for Node.js applications with multi-environment support",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "test:watch": "mocha --watch",
+    "test:coverage": "c8 mocha"
   },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "examples/"
+  ],
+  "keywords": [
+    "config",
+    "configuration",
+    "settings",
+    "environment",
+    "env",
+    "node-config",
+    "multi-environment",
+    "secrets",
+    "simpleworkjs",
+    "configuration-management"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/simpleworkjs/conf.git"
@@ -16,7 +39,15 @@
     "url": "https://github.com/simpleworkjs/conf/issues"
   },
   "homepage": "https://github.com/simpleworkjs/conf#readme",
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "dependencies": {
     "extend": "^3.0.2"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "chai": "^4.3.10",
+    "c8": "^8.0.1"
   }
 }

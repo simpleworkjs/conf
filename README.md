@@ -1,120 +1,263 @@
-## Usage
+# @simpleworkjs/conf
 
-Install the package using
+Configuration management for the SimpleWorkJS framework
+
+[![npm version](https://img.shields.io/npm/v/@simpleworkjs/conf.svg)](https://www.npmjs.com/package/@simpleworkjs/conf)
+[![Tests](https://github.com/simpleworkjs/conf/workflows/Tests/badge.svg)](https://github.com/simpleworkjs/conf/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Configuration Structure](#configuration-structure)
+- [How It Works](#how-it-works)
+- [API Reference](#api-reference)
+- [Examples](#examples)
+- [Best Practices](#best-practices)
+- [Development](#development)
+
+## Installation
 
 ```bash
 npm install --save @simpleworkjs/conf
 ```
 
-In your project, make a `conf` directory at the same level as the
-`node_modules` folder. This folder should look like:
+## Quick Start
 
- ```
-/node_modules
-/conf
-├── base.js 		<-- required, parsed first 
-├── production.js	<-- optional, based on the ENV variable
-├── development.js
-├── other_env_name.js	<-- ENV can be what ever name you want...
-└── secrets.js 		<-- optional, parsed last and should be in .gitignore file!
+Create a `conf` directory in your project root (at the same level as `node_modules`):
+
+```
+your-project/
+├── node_modules/
+├── conf/
+│   ├── base.js           # Required - base configuration
+│   ├── development.js    # Optional - development environment config
+│   ├── production.js     # Optional - production environment config
+│   └── secrets.js        # Optional - sensitive data (add to .gitignore!)
+└── package.json
 ```
 
-These files can be standard JSON or a JS file that declare a `module.exports` with an object.
+Configuration files can be either JSON or JavaScript files exporting an object.
 
-Example `base.js`
+**Example `conf/base.js`:**
 ```js
 module.exports = {
-	ldap: {
-		url: 'ldap://ldap.local',
-		bindDN: 'cn=ldapclient service,ou=people,dc=theta42,dc=com',
-		bindPassword: '__IN SRECREST FILE__',
+	app: {
+		name: 'My Application',
+		port: 3000
 	},
-	sql: {
-		"storage": "database_test.sqlite",
-		"dialect": "sqlite",
-	},
-};
-```
-Example `secrets.js`
-```js
-module.exports = {
-	ldap: {
-		bindPassword: 'Hunter123',
+	database: {
+		host: 'localhost',
+		name: 'myapp'
 	}
 };
 ```
 
-Require and use in any file you like.
+**Example `conf/production.js`:**
+```js
+module.exports = {
+	app: {
+		port: 8080
+	},
+	database: {
+		host: 'prod-db.example.com'
+	}
+};
+```
 
+**Example `conf/secrets.js`:**
+```js
+module.exports = {
+	database: {
+		password: 'super-secret-password',
+		username: 'dbuser'
+	},
+	apiKeys: {
+		stripe: 'sk_live_...'
+	}
+};
+```
+
+**Usage in your application:**
 ```js
 const conf = require('@simpleworkjs/conf');
 
-console.log(conf.ldap)
-// {
-//	url: 'ldap://ldap.local',
-//	bindDN: 'cn=ldapclient service,ou=people,dc=theta42,dc=com',
-//	bindPassword: 'Hunter123',
-//}
+console.log(conf.app.name);        // 'My Application'
+console.log(conf.database.host);   // 'localhost' in development, 'prod-db.example.com' in production
+console.log(conf.database.password); // 'super-secret-password' (from secrets.js)
+console.log(conf.environment);     // 'development' or 'production'
 ```
 
-**It is highly recommended you git ignore the secrets file**
+**Important:** Add `secrets.js` to your `.gitignore` file to prevent committing sensitive data.
 
-## What is a conf object?
+## Configuration Structure
 
-A Configuration Object (key:value pair) holds run time variables that will be
-used throughout the app. These variables include things like server address
-for API's and database, username/password/tokens, limits for actions, what
-should be logged, and much more. There are several ways to handle runtime
-configuration. Some of these variables are sensitive information you do not want
-to be included in the git repo. For the rest of this document, we will follow a
-multi-tiered settings strategy inspired by Django. The terms "settings",
-"configuration", "conf" will used interchangeably.
+### Directory Layout
 
-The goal is to build a single Object comprising `key: value` pairs of the
-settings your project needs when it runs. We dont want to hardcode these values
-for several reasons, take the following settings object:
+The `conf` directory should be at the root of your project:
 
+- `base.js` - **Required** - Contains shared configuration used across all environments
+- `<environment>.js` - **Optional** - Environment-specific overrides (e.g., `development.js`, `production.js`, `staging.js`)
+- `secrets.js` - **Optional** - Sensitive data that should not be committed to version control
+
+### Load Order
+
+Configuration files are loaded and merged in the following order:
+
+1. **base.js** - Loaded first (required)
+2. **<environment>.js** - Loaded second, overrides base settings
+3. **secrets.js** - Loaded last, overrides all previous settings
+
+Each subsequent file deeply merges with the previous configuration, allowing you to override specific values while keeping others intact.
+
+## How It Works
+
+The package uses a multi-tiered configuration strategy inspired by Django's settings system:
+
+1. **Shared Configuration** - Common settings go in `base.js`
+2. **Environment-Specific** - Environment overrides go in `development.js`, `production.js`, etc.
+3. **Secrets** - Sensitive data goes in `secrets.js` (add to `.gitignore`)
+
+The environment is determined by the `NODE_ENV` environment variable (defaults to `development`).
+
+### Example Scenario
+
+Consider this configuration:
+
+**base.js:**
 ```js
 {
-	copyrightMessage: "myCoolApp © 2024 ",
-	featureAPI:{
-		url: "https://api.coolCompany.com/api/v0",
-		token: '234-234sdf-23s-sdf2323sdf-sdfe234-'
-	},
-	logInfo: false,
-	logPath: '/var/log/myCoolApp/app.log'
+  app: { name: 'MyApp', port: 3000 },
+  api: { url: 'https://api.example.com', timeout: 5000 }
 }
 ```
 
-Based on the above, let's look at some main reasons we can't get by with a single
-configuration file:
-
-1) Things like `featureAPI.url` and `logPath` will likely change depending one
-where (production, staging, local dev) the app is running. So we want to be able
-to define settings based on the current environment.
-
-2) `featureAPI.token` is a secret we don't want to share with the world. We don't
-want that information tracked in the git repo.
-
-3) `copyrightMessage` is a rather generic and universal thing we want to use
-everywhere.
-
-Based on these requirements, we will have 3 "configuration files" that override
-each other.
-
-```
-base.js
-production.js or development.js or any other environment name that makes sense
-secrets.js
+**production.js:**
+```js
+{
+  app: { port: 8080 },
+  api: { timeout: 10000 }
+}
 ```
 
-`base.js` and the environment conf files will be tracked in the repo for the
-world to see. `secrets.js` will be ignored by the git repo, as it holds
-secrets and settings that only pertain to local useage.
+**secrets.js:**
+```js
+{
+  api: { token: 'secret-api-key' }
+}
+```
 
-The `base.js` file will be loaded first. Then the environment file matching the
-current environment will be loaded, overwriting any values in base. Finlay,
-`secrets.js` is loaded, overwriting any files from both the base and environment.
+**Result in production:**
+```js
+{
+  app: { name: 'MyApp', port: 8080 },          // port from production.js
+  api: {
+    url: 'https://api.example.com',            // from base.js
+    timeout: 10000,                             // from production.js
+    token: 'secret-api-key'                     // from secrets.js
+  },
+  environment: 'production'                     // auto-added
+}
+```
 
-The only required file is `base.js`. The app will throw a warning to the console
-if an environment and/or `secrets.js` are not found, but the app will run.
+## API Reference
+
+### Environment Variables
+
+- **`NODE_ENV`** - Sets the environment (default: `development`)
+- **`CONF_DIR`** - Override the configuration directory path (default: `./conf`)
+
+### Configuration Object
+
+The exported configuration object includes all merged settings plus:
+
+- **`environment`** - The current environment name (from `NODE_ENV`)
+
+## Examples
+
+### Using with Express
+
+```js
+const conf = require('@simpleworkjs/conf');
+const express = require('express');
+
+const app = express();
+
+app.listen(conf.app.port, () => {
+  console.log(`Server running on port ${conf.app.port}`);
+});
+```
+
+### Different Environments
+
+```bash
+# Development (default)
+npm start
+
+# Production
+NODE_ENV=production npm start
+
+# Custom environment
+NODE_ENV=staging npm start  # Loads conf/staging.js
+```
+
+### Custom Config Directory
+
+```bash
+CONF_DIR=/path/to/config node app.js
+```
+
+## Best Practices
+
+1. **Always commit** `base.js` and environment-specific files to version control
+2. **Never commit** `secrets.js` - add it to `.gitignore`
+3. **Use environment files** for environment-specific URLs, ports, and settings
+4. **Use secrets.js** for API keys, passwords, tokens, and other sensitive data
+5. **Keep base.js minimal** - only include truly shared configuration
+6. **Document your config** - add comments explaining what each setting does
+
+## Development
+
+### Running Tests
+
+```bash
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Make your changes and add tests
+4. Run tests to ensure they pass: `npm test`
+5. Commit your changes: `git commit -m 'Add my feature'`
+6. Push to the branch: `git push origin feature/my-feature`
+7. Submit a pull request
+
+### Testing
+
+The test suite uses Mocha and Chai and includes:
+
+- Basic configuration loading
+- Environment-based configuration
+- Secrets file handling
+- Deep merge behavior
+- Error handling
+- Environment variable support
+
+Tests run on multiple Node.js versions (12, 14, 16, 18, 20) and operating systems (Ubuntu, Windows, macOS) via GitHub Actions.
+
+## License
+
+MIT © simpleworkjs

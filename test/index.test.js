@@ -216,6 +216,109 @@ describe('@simpleworkjs/conf', function() {
 		});
 	});
 
+	describe('Environment variable overrides (app_*)', function() {
+		it('should override a base value with a string', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-env-overrides');
+			process.chdir(fixturePath);
+			process.env.app_database__host = 'env-host';
+
+			const conf = require('../index.js');
+
+			expect(conf.database.host).to.equal('env-host');
+		});
+
+		it('should coerce numeric values via JSON.parse', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-env-overrides');
+			process.chdir(fixturePath);
+			process.env.app_app__port = '9090';
+
+			const conf = require('../index.js');
+
+			expect(conf.app.port).to.equal(9090);
+			expect(conf.app.port).to.be.a('number');
+		});
+
+		it('should coerce boolean values via JSON.parse (not leave them as strings)', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-env-overrides');
+			process.chdir(fixturePath);
+			process.env.app_features__enableCache = 'false';
+
+			const conf = require('../index.js');
+
+			expect(conf.features.enableCache).to.equal(false);
+			expect(conf.features.enableCache).to.be.a('boolean');
+		});
+
+		it('should keep non-JSON values as raw strings', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-env-overrides');
+			process.chdir(fixturePath);
+			process.env.app_database__host = 'ldap://localhost:389';
+
+			const conf = require('../index.js');
+
+			expect(conf.database.host).to.equal('ldap://localhost:389');
+			expect(conf.database.host).to.be.a('string');
+		});
+
+		it('should create nested paths that do not exist in base', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-env-overrides');
+			process.chdir(fixturePath);
+			process.env.app_level1__level2__deep = '42';
+
+			const conf = require('../index.js');
+
+			expect(conf.level1.level2.deep).to.equal(42);
+		});
+
+		it('should handle underscore-bearing keys via __ separator', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-env-overrides');
+			process.chdir(fixturePath);
+			process.env.app_oauth__token_lifetime__access_token = '99';
+
+			const conf = require('../index.js');
+
+			// token_lifetime is one key (it contains an underscore), NOT
+			// oauth.token.lifetime — the __ separator keeps it intact.
+			expect(conf.oauth.token_lifetime.access_token).to.equal(99);
+			expect(conf.oauth.token_lifetime.refresh_token).to.equal(2592000); // untouched
+		});
+
+		it('should win over values set in secrets.js', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-env-overrides');
+			process.chdir(fixturePath);
+			process.env.app_oauth__jwtSecret = 'from-env';
+
+			const conf = require('../index.js');
+
+			expect(conf.oauth.jwtSecret).to.equal('from-env'); // env beats secrets.js
+			expect(conf.database.password).to.equal('secret-password'); // secrets.js still applies
+		});
+
+		it('should ignore env vars with empty path segments', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-env-overrides');
+			process.chdir(fixturePath);
+			process.env.app_database__host = 'real-override';
+			process.env['app_database__'] = 'should-be-ignored'; // trailing __
+			process.env['app_'] = 'should-be-ignored'; // empty path
+
+			const conf = require('../index.js');
+
+			expect(conf.database.host).to.equal('real-override');
+			expect(conf['']).to.be.undefined;
+		});
+
+		it('should leave config unchanged when no app_* env vars are set', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-env-overrides');
+			process.chdir(fixturePath);
+
+			const conf = require('../index.js');
+
+			expect(conf.app.name).to.equal('Test App'); // base.js
+			expect(conf.app.port).to.equal(3000); // base.js, no override
+			expect(conf.database.password).to.equal('secret-password'); // secrets.js
+		});
+	});
+
 	describe('Return value', function() {
 		it('should return an object', function() {
 			const fixturePath = path.join(__dirname, 'fixtures', 'basic');

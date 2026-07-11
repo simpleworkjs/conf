@@ -109,9 +109,41 @@ Configuration files are loaded and merged in the following order:
 
 1. **base.js** - Loaded first (required)
 2. **<environment>.js** - Loaded second, overrides base settings
-3. **secrets.js** - Loaded last, overrides all previous settings
+3. **secrets.js** - Loaded third, overrides all previous settings
+4. **`app_*` env vars** - Applied last, overrides everything (highest precedence)
 
-Each subsequent file deeply merges with the previous configuration, allowing you to override specific values while keeping others intact.
+Each subsequent layer deeply merges with the previous configuration, allowing you to override specific values while keeping others intact. Environment variables win over all files — this follows the [twelve-factor](https://12factor.net/config) convention that env vars are the highest-precedence config layer.
+
+### Environment Variable Overrides (`app_*`)
+
+Any environment variable whose name starts with `app_` is applied as a config
+override with the highest precedence. The remainder of the name is split on
+**double-underscore** (`__`) into a nested path into the config object:
+
+| Env var | Sets | Type |
+|---------|------|------|
+| `app_database__host=env-db` | `conf.database.host` | string |
+| `app_app__port=9090` | `conf.app.port` | number (`JSON.parse`) |
+| `app_features__enableCache=false` | `conf.features.enableCache` | boolean (`JSON.parse`) |
+| `app_oauth__jwtSecret=secret` | `conf.oauth.jwtSecret` | string |
+| `app_oauth__token_lifetime__access_token=3600` | `conf.oauth.token_lifetime.access_token` | number |
+
+Values are coerced via `JSON.parse` when the value is valid JSON (so numbers,
+booleans, `null`, and JSON objects/arrays become real types), and kept as the
+raw string otherwise (URLs, passwords, free-form text). Use double-underscore
+`__` — not single `_` — so that keys containing underscores (like
+`token_lifetime`) are kept intact rather than split further.
+
+```bash
+# Override a few values without touching any config file
+app_database__host=prod-db.example.com \
+app_database__password=super-secret \
+app_app__port=8080 \
+node app.js
+```
+
+Env vars with empty path segments (leading/trailing/repeated `__`, or just
+`app_`) are ignored.
 
 ## How It Works
 
@@ -120,6 +152,7 @@ The package uses a multi-tiered configuration strategy inspired by Django's sett
 1. **Shared Configuration** - Common settings go in `base.js`
 2. **Environment-Specific** - Environment overrides go in `development.js`, `production.js`, etc.
 3. **Secrets** - Sensitive data goes in `secrets.js` (add to `.gitignore`)
+4. **Environment Variables** - Any `app_*` env var overrides everything above (highest precedence)
 
 The environment is determined by the `NODE_ENV` environment variable (defaults to `development`).
 
@@ -169,6 +202,10 @@ Consider this configuration:
 
 - **`NODE_ENV`** - Sets the environment (default: `development`)
 - **`CONF_DIR`** - Override the configuration directory path (default: `./conf`)
+- **`app_*`** - Any env var prefixed with `app_` overrides the merged config at the
+  highest precedence. The rest of the name is split on `__` into a nested path,
+  and the value is `JSON.parse`-coerced when possible (see
+  [Environment Variable Overrides](#environment-variable-overrides-app)).
 
 ### Configuration Object
 

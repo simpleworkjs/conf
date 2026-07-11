@@ -7,11 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- GitHub Pages documentation site with modern, responsive design
-- Interactive code examples with copy buttons
-- Automatic deployment workflow for documentation
-
 ### Changed
 - Updated Node.js engine requirement from >=12.0.0 to >=16.0.0
 - Updated CI test matrix to Node 16, 18, 20, 22 (removed EOL versions 12 and 14)
@@ -19,6 +14,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed missing test fixture directories in git repository
 - Fixed CI failures on macOS with older Node versions
+
+## [1.1.0] - 2026-07-11
+
+### Added
+- `app_*` environment-variable overrides: any env var whose name starts with
+  `app_` overrides the merged configuration as the highest-precedence layer
+  (winning over `base.js`, `<environment>.js`, and `secrets.js`). The remainder
+  of the name is split on double-underscore (`__`) into a nested path. Values
+  are coerced via `JSON.parse` when possible (numbers, booleans, null, JSON
+  objects/arrays) and kept as raw strings otherwise. For example:
+  `app_database__host=env-db` sets `conf.database.host`; `app_app__port=9090`
+  sets a numeric `conf.app.port`; `app_smtp__secure=false` sets a boolean
+  `false`; `app_oauth__token_lifetime__access_token=3600` reaches the
+  underscore-bearing key `oauth.token_lifetime.access_token`.
 
 ## [1.0.0] - 2025-12-30
 
@@ -58,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for both JavaScript and JSON configuration files
 - Automatic `environment` property injection
 
-[Unreleased]: https://github.com/simpleworkjs/conf/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/simpleworkjs/conf/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/simpleworkjs/conf/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/simpleworkjs/conf/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/simpleworkjs/conf/releases/tag/v0.1.0

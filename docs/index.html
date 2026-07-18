@@ -45,28 +45,28 @@
                 <h2>Features</h2>
                 <div class="features-grid">
                     <div class="feature-card">
-                        <h3>🌍 Multi-Environment</h3>
-                        <p>Seamlessly switch between development, production, and custom environments using NODE_ENV</p>
+                        <h3>Multi-Environment</h3>
+                        <p>Switch between development, production, and custom environments with NODE_ENV</p>
                     </div>
                     <div class="feature-card">
-                        <h3>🔒 Secrets Management</h3>
+                        <h3>Secrets Management</h3>
                         <p>Keep sensitive data separate from your codebase with dedicated secrets files</p>
                     </div>
                     <div class="feature-card">
-                        <h3>🔄 Deep Merge</h3>
-                        <p>Configurations are deeply merged, allowing granular overrides while preserving base settings</p>
+                        <h3>Deep Merge</h3>
+                        <p>Override values at any depth without repeating the whole configuration</p>
                     </div>
                     <div class="feature-card">
-                        <h3>📘 TypeScript Support</h3>
-                        <p>Full TypeScript definitions included for excellent IDE autocomplete and type safety</p>
+                        <h3>TypeScript Support</h3>
+                        <p>TypeScript definitions included for typed configuration access</p>
                     </div>
                     <div class="feature-card">
-                        <h3>✅ Well Tested</h3>
-                        <p>96%+ code coverage with comprehensive test suite across multiple Node versions</p>
+                        <h3>Well Tested</h3>
+                        <p>96%+ coverage across multiple Node.js versions and operating systems</p>
                     </div>
                     <div class="feature-card">
-                        <h3>🪶 Lightweight</h3>
-                        <p>Minimal dependencies, simple API, zero configuration to get started</p>
+                        <h3>Lightweight</h3>
+                        <p>Small dependency footprint and a small API surface</p>
                     </div>
                 </div>
             </section>
@@ -122,7 +122,7 @@
 };</code></pre>
 
                 <h3>Custom Secrets File</h3>
-                <p>You can point to a secrets file outside the default <code>conf/</code> directory using <code>CONF_SECRETS</code>. This is useful for deployments that store secrets in system paths such as <code>/etc/</code>:</p>
+                <p>Point to a secrets file outside the default <code>conf/</code> directory with <code>CONF_SECRETS</code>, for example when secrets are stored in <code>/etc/</code>:</p>
                 <pre><code>CONF_SECRETS=/etc/appName.js node app.js</code></pre>
                 <p>Relative paths are resolved from <code>process.cwd()</code>.</p>
 
@@ -184,7 +184,7 @@ console.log(conf.environment);     // 'development' or 'production'</code></pre>
                 </ul>
 
                 <h3>TypeScript</h3>
-                <p>Extend the Config interface for type safety:</p>
+                <p>Extend the Config interface for typed access:</p>
                 <pre><code>declare module '@simpleworkjs/conf' {
   interface Config {
     app: {
@@ -200,7 +200,7 @@ console.log(conf.environment);     // 'development' or 'production'</code></pre>
 }
 
 import conf = require('@simpleworkjs/conf');
-const port: number = conf.app.port; // Fully typed!</code></pre>
+const port: number = conf.app.port;</code></pre>
             </section>
 
             <section id="examples" class="section">
@@ -234,10 +234,10 @@ NODE_ENV=staging npm start  # Loads conf/staging.js</code></pre>
                 <h2>Best Practices</h2>
                 <ul class="best-practices-list">
                     <li><strong>Always commit</strong> <code>base.js</code> and environment-specific files to version control</li>
-                    <li><strong>Never commit</strong> <code>secrets.js</code> - add it to <code>.gitignore</code></li>
+                    <li><strong>Never commit</strong> <code>secrets.js</code> - add it to <code>.gitignore</code>, and never commit files referenced by <code>CONF_SECRETS</code> that contain real values</li>
                     <li><strong>Use environment files</strong> for environment-specific URLs, ports, and settings</li>
-                    <li><strong>Use secrets.js</strong> for API keys, passwords, tokens, and other sensitive data</li>
-                    <li><strong>Keep base.js minimal</strong> - only include truly shared configuration</li>
+                    <li><strong>Use secrets.js or CONF_SECRETS</strong> for API keys, passwords, tokens, and other sensitive data</li>
+                    <li><strong>Keep base.js minimal</strong> - only include shared configuration</li>
                     <li><strong>Document your config</strong> - add comments explaining what each setting does</li>
                 </ul>
             </section>

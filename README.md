@@ -1,12 +1,12 @@
 # @simpleworkjs/conf
 
-Configuration management for the SimpleWorkJS framework
+Configuration management for the SimpleWorkJS framework.
 
 [![npm version](https://img.shields.io/npm/v/@simpleworkjs/conf.svg)](https://www.npmjs.com/package/@simpleworkjs/conf)
 [![Tests](https://github.com/simpleworkjs/conf/workflows/Tests/badge.svg)](https://github.com/simpleworkjs/conf/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-📚 **[View Full Documentation](https://simpleworkjs.github.io/conf/)**
+[View Full Documentation](https://simpleworkjs.github.io/conf/)
 
 ## Table of Contents
 
@@ -112,7 +112,7 @@ Configuration files are loaded and merged in the following order:
 3. **secrets.js** (or the file pointed to by `CONF_SECRETS`) - Loaded third, overrides all previous settings
 4. **`app_*` env vars** - Applied last, overrides everything (highest precedence)
 
-Each subsequent layer deeply merges with the previous configuration, allowing you to override specific values while keeping others intact. Environment variables win over all files — this follows the [twelve-factor](https://12factor.net/config) convention that env vars are the highest-precedence config layer.
+Each subsequent layer deeply merges with the previous configuration, allowing you to override specific values while keeping others intact. Environment variables win over all files. This matches the [twelve-factor](https://12factor.net/config) convention that env vars are the highest-precedence config layer.
 
 ### Environment Variable Overrides (`app_*`)
 
@@ -131,7 +131,7 @@ override with the highest precedence. The remainder of the name is split on
 Values are coerced via `JSON.parse` when the value is valid JSON (so numbers,
 booleans, `null`, and JSON objects/arrays become real types), and kept as the
 raw string otherwise (URLs, passwords, free-form text). Use double-underscore
-`__` — not single `_` — so that keys containing underscores (like
+`__` instead of single `_` so that keys containing underscores (like
 `token_lifetime`) are kept intact rather than split further.
 
 ```bash
@@ -252,7 +252,7 @@ CONF_DIR=/path/to/config node app.js
 
 ### Custom Secrets File
 
-You can point to a secrets file outside the default `conf/` directory. This is useful for deployments that store secrets in a system path such as `/etc/`:
+Point to a secrets file outside the default `conf/` directory, for example when secrets are stored in `/etc/`:
 
 ```bash
 CONF_SECRETS=/etc/appName.js node app.js
@@ -264,10 +264,11 @@ Relative paths are resolved from `process.cwd()`.
 
 1. **Always commit** `base.js` and environment-specific files to version control
 2. **Never commit** `secrets.js` - add it to `.gitignore`
-3. **Use environment files** for environment-specific URLs, ports, and settings
-4. **Use secrets.js** for API keys, passwords, tokens, and other sensitive data
-5. **Keep base.js minimal** - only include truly shared configuration
-6. **Document your config** - add comments explaining what each setting does
+3. **Never commit** `CONF_SECRETS` files that contain real values
+4. **Use environment files** for environment-specific URLs, ports, and settings
+5. **Use secrets.js or CONF_SECRETS** for API keys, passwords, tokens, and other sensitive data
+6. **Keep base.js minimal** - only include truly shared configuration
+7. **Document your config** - add comments explaining what each setting does
 
 ## Development
 

@@ -1,6 +1,6 @@
 {
   "name": "@simpleworkjs/conf",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Lightweight, flexible configuration management for Node.js applications with multi-environment support",
   "main": "index.js",
   "types": "index.d.ts",

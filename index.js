@@ -97,6 +97,18 @@ function getConfigRoot() {
 }
 
 /**
+ * Get the path to the secrets configuration file
+ * @param {string} configRoot - The configuration directory root path
+ * @returns {string} The absolute path to the secrets file
+ */
+function getSecretsPath(configRoot) {
+	if (process.env.CONF_SECRETS) {
+		return path.resolve(process.env.CONF_SECRETS);
+	}
+	return path.join(configRoot, 'secrets');
+}
+
+/**
  * Load a configuration file
  * @param {string} filePath - Path to the configuration file
  * @param {boolean} required - Whether the file is required
@@ -140,12 +152,13 @@ function load(filePath, required){
 };
 
 const configRoot = getConfigRoot();
+const secretsPath = getSecretsPath(configRoot);
 
 const config = extend(
 	true, // enable deep copy
 	load(path.join(configRoot, 'base'), true),
 	load(path.join(configRoot, environment)),
-	load(path.join(configRoot, 'secrets')),
+	load(secretsPath),
 	{environment}
 );
 

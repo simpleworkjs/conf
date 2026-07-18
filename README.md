@@ -101,7 +101,7 @@ The `conf` directory should be at the root of your project:
 
 - `base.js` - **Required** - Contains shared configuration used across all environments
 - `<environment>.js` - **Optional** - Environment-specific overrides (e.g., `development.js`, `production.js`, `staging.js`)
-- `secrets.js` - **Optional** - Sensitive data that should not be committed to version control
+- `secrets.js` - **Optional** - Sensitive data that should not be committed to version control. Use the `CONF_SECRETS` environment variable to point to a secrets file outside the `conf` directory (for example, `/etc/appName.js`).
 
 ### Load Order
 
@@ -109,7 +109,7 @@ Configuration files are loaded and merged in the following order:
 
 1. **base.js** - Loaded first (required)
 2. **<environment>.js** - Loaded second, overrides base settings
-3. **secrets.js** - Loaded third, overrides all previous settings
+3. **secrets.js** (or the file pointed to by `CONF_SECRETS`) - Loaded third, overrides all previous settings
 4. **`app_*` env vars** - Applied last, overrides everything (highest precedence)
 
 Each subsequent layer deeply merges with the previous configuration, allowing you to override specific values while keeping others intact. Environment variables win over all files — this follows the [twelve-factor](https://12factor.net/config) convention that env vars are the highest-precedence config layer.
@@ -204,6 +204,7 @@ Consider this configuration:
 
 - **`NODE_ENV`** - Sets the environment (default: `development`)
 - **`CONF_DIR`** - Override the configuration directory path (default: `./conf`)
+- **`CONF_SECRETS`** - Override the path to the secrets file (default: `<CONF_DIR>/secrets.js`). Relative paths are resolved from `process.cwd()`.
 - **`app_*`** - Any env var prefixed with `app_` overrides the merged config at the
   highest precedence. The rest of the name is split on `__` into a nested path,
   and the value is `JSON.parse`-coerced when possible (see
@@ -248,6 +249,16 @@ NODE_ENV=staging npm start  # Loads conf/staging.js
 ```bash
 CONF_DIR=/path/to/config node app.js
 ```
+
+### Custom Secrets File
+
+You can point to a secrets file outside the default `conf/` directory. This is useful for deployments that store secrets in a system path such as `/etc/`:
+
+```bash
+CONF_SECRETS=/etc/appName.js node app.js
+```
+
+Relative paths are resolved from `process.cwd()`.
 
 ## Best Practices
 

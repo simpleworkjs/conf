@@ -1,6 +1,6 @@
 {
   "name": "@simpleworkjs/conf",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Lightweight, flexible configuration management for Node.js applications with multi-environment support",
   "main": "index.js",
   "types": "index.d.ts",
@@ -33,7 +33,7 @@
     "type": "git",
     "url": "git+https://github.com/simpleworkjs/conf.git"
   },
-  "author": "William Mantly",
+  "author": "William Mantly <william@mantly.vip> (https://william.mantly.vip)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/simpleworkjs/conf/issues"

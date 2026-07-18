@@ -80,6 +80,57 @@ describe('@simpleworkjs/conf', function() {
 			expect(conf.database.password).to.equal('secret-password'); // from secrets.js
 			expect(conf.app.name).to.equal('Test App'); // from base.js
 		});
+
+		it('should use CONF_SECRETS as the secrets file path', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-custom-secrets');
+			process.chdir(fixturePath);
+			process.env.CONF_SECRETS = path.join(fixturePath, 'custom-secrets.js');
+
+			const conf = require('../index.js');
+
+			expect(conf.api.token).to.equal('custom-secret-token'); // from CONF_SECRETS
+		});
+
+		it('should resolve relative CONF_SECRETS from process.cwd()', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-custom-secrets');
+			process.chdir(fixturePath);
+			process.env.CONF_SECRETS = './custom-secrets.js';
+
+			const conf = require('../index.js');
+
+			expect(conf.api.token).to.equal('custom-secret-token');
+		});
+
+		it('should fall back to conf/secrets.js when CONF_SECRETS is not set', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-custom-secrets');
+			process.chdir(fixturePath);
+			delete process.env.CONF_SECRETS;
+
+			const conf = require('../index.js');
+
+			expect(conf.api.token).to.equal('default-secret-token'); // from conf/secrets.js
+		});
+
+		it('should warn but not exit when CONF_SECRETS file is missing', function() {
+			const fixturePath = path.join(__dirname, 'fixtures', 'with-missing-custom-secrets');
+			process.chdir(fixturePath);
+			process.env.CONF_SECRETS = path.join(fixturePath, 'nonexistent-secrets.js');
+
+			const originalWarn = console.warn;
+			let warnCalled = false;
+			let warnMessage = '';
+			console.warn = (msg) => { warnCalled = true; warnMessage += msg + ' '; };
+
+			try {
+				const conf = require('../index.js');
+				expect(conf).to.exist;
+				expect(conf.app.name).to.equal('Test App');
+				expect(warnCalled).to.be.true;
+				expect(warnMessage).to.include('nonexistent-secrets');
+			} finally {
+				console.warn = originalWarn;
+			}
+		});
 	});
 
 	describe('Deep merge behavior', function() {
@@ -328,7 +379,7 @@ describe('@simpleworkjs/conf', function() {
 			expect(conf).to.be.an('object');
 		});
 
-		it('should be immutable after first require', function() {
+		it('should return the same cached object on subsequent requires', function() {
 			const fixturePath = path.join(__dirname, 'fixtures', 'basic');
 			process.chdir(fixturePath);
 

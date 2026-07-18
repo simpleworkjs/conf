@@ -7,13 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-17
+
+### Added
+- `CONF_SECRETS` environment variable to override the path to the secrets file.
+  Useful for deployments that store secrets outside the project directory, e.g.
+  `CONF_SECRETS=/etc/appName.js`. Relative paths are resolved from
+  `process.cwd()`.
+
 ### Changed
-- Updated Node.js engine requirement from >=12.0.0 to >=16.0.0
-- Updated CI test matrix to Node 16, 18, 20, 22 (removed EOL versions 12 and 14)
+- `CONF_DIR` relative paths are now resolved from `process.cwd()`.
+- Upgraded CI coverage upload to `codecov/codecov-action@v4` with token.
+- Improved config loader error handling: `MODULE_NOT_FOUND` is now only treated
+  as a missing config file when the config file itself is absent; runtime errors
+  in required files cause `process.exit(1)`.
+- Suppressed expected console warnings/errors during tests for cleaner output.
 
 ### Fixed
-- Fixed missing test fixture directories in git repository
-- Fixed CI failures on macOS with older Node versions
+- Renamed misleading test asserting cached module identity.
+- Documented `process.exit(1)` behavior for broken/missing required config files.
 
 ## [1.1.0] - 2026-07-11
 

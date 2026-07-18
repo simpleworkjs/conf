@@ -83,9 +83,11 @@ function applyEnvOverrides(config) {
  * @returns {string} The absolute path to the conf directory
  */
 function getConfigRoot() {
-	// Allow override via environment variable
+	// Allow override via environment variable.
+	// Resolve relative paths from the current working directory so behavior
+	// matches the default conf/ location.
 	if (process.env.CONF_DIR) {
-		return process.env.CONF_DIR;
+		return path.resolve(process.env.CONF_DIR);
 	}
 
 	// When installed as a package, look for conf dir in the project root
@@ -101,20 +103,38 @@ function getConfigRoot() {
  * @returns {Object} The loaded configuration object or empty object if not found
  */
 function load(filePath, required){
+	let resolvedPath;
+
 	try {
-		return require(filePath);
+		resolvedPath = require.resolve(filePath);
 	} catch(error){
-		if(error.name === 'SyntaxError'){
-			console.error(`Loading ${filePath} file failed!\n`, error);
-			process.exit(1);
-		} else if (error.code === 'MODULE_NOT_FOUND'){
+		if (error.code === 'MODULE_NOT_FOUND'){
 			console.warn(`No config file ${filePath} FOUND! This may cause issues...`);
 			if (required){
 				process.exit(1);
 			}
 			return {};
-		}else{
-			console.error(`Unknown error in loading ${filePath} config file.\n`, error);
+		} else {
+			console.error(`Unknown error resolving ${filePath} config file.\n`, error);
+			if (required){
+				process.exit(1);
+			}
+			return {};
+		}
+	}
+
+	try {
+		return require(resolvedPath);
+	} catch(error){
+		if(error.name === 'SyntaxError'){
+			console.error(`Loading ${resolvedPath} file failed!\n`, error);
+			process.exit(1);
+		} else {
+			console.error(`Unknown error in loading ${resolvedPath} config file.\n`, error);
+			if (required){
+				process.exit(1);
+			}
+			return {};
 		}
 	}
 };

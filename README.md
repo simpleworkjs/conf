@@ -156,6 +156,8 @@ The package uses a multi-tiered configuration strategy inspired by Django's sett
 
 The environment is determined by the `NODE_ENV` environment variable (defaults to `development`).
 
+> **Note on failures:** This library treats a broken or missing required configuration as a fatal startup error. If `base.js` cannot be loaded (missing file, syntax error, or runtime error), or if an unrecoverable error occurs while resolving or loading it, the library will call `process.exit(1)`. Optional files (`<environment>.js` and `secrets.js`) only log a warning and continue with an empty object when they are missing.
+
 ### Example Scenario
 
 Consider this configuration:

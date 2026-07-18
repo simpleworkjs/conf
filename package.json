@@ -33,7 +33,7 @@
     "type": "git",
     "url": "git+https://github.com/simpleworkjs/conf.git"
   },
-  "author": "William Mantly",
+  "author": "William Mantly <william@mantly.vip> (https://william.mantly.vip)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/simpleworkjs/conf/issues"

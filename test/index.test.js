@@ -328,7 +328,7 @@ describe('@simpleworkjs/conf', function() {
 			expect(conf).to.be.an('object');
 		});
 
-		it('should be immutable after first require', function() {
+		it('should return the same cached object on subsequent requires', function() {
 			const fixturePath = path.join(__dirname, 'fixtures', 'basic');
 			process.chdir(fixturePath);
 
